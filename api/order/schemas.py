@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from typing import List, Optional
-from api.order.models.orders import Items
+from api.order.models.orders import Items, OrderStatus
 
 
 class OrderSchema(BaseModel):
@@ -8,3 +8,7 @@ class OrderSchema(BaseModel):
     city: str
     comment: str
     carts: Optional[List[Items]] = []
+
+
+class StatusSchema(BaseModel):
+    status: OrderStatus
