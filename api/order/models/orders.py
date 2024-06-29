@@ -3,8 +3,11 @@ from typing import Optional, List
 from pydantic import Field, BaseModel
 from enum import Enum
 
+from api.order.models.payment_history import PaymentHistory
+
 
 class OrderStatus(str, Enum):
+    PAYMENT = 'Ожидание оплаты'
     NEW = "Новый заказ"
     CONFIRMED = "Заказ подтвержден"
     PREPARING = "Заказ готовится"
@@ -28,7 +31,8 @@ class Order(BaseModel):
     city: str = Field(...)
     items: Optional[List[Items]] = []
     total_price: Optional[float] = 0
-    status: OrderStatus = OrderStatus.NEW
+    status: OrderStatus = OrderStatus.PAYMENT
+    payment_history: Optional[PaymentHistory] = None
 
 
 class OrdersUser(Document):

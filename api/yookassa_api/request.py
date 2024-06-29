@@ -1,3 +1,5 @@
+import asyncio
+import json
 import uuid
 
 from config import settings
@@ -10,6 +12,8 @@ async def create_payment(value, description):
     Configuration.account_id = settings.yookassa_account_id
     Configuration.secret_key = settings.yookassa_api_key
 
+    payment_id = uuid.uuid4()
+
     payment = Payment.create({
         "amount": {
             "value": value,
@@ -21,6 +25,16 @@ async def create_payment(value, description):
         },
         "capture": True,
         "description": description
-    }, uuid.uuid4())
+    }, payment_id)
 
-    return payment["confirmation"]["confirmation_url"]
+    return payment["confirmation"]["confirmation_url"], payment['id']
+
+
+async def check_payment(payment_id):
+
+    Configuration.account_id = settings.yookassa_account_id
+    Configuration.secret_key = settings.yookassa_api_key
+
+    payment = json.loads((Payment.find_one(payment_id)).json())
+
+    return payment['status']
