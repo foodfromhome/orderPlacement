@@ -6,7 +6,7 @@ services:
     env_file:
       - .env
     ports:
-      - "27018:27017"
+      - "27018:27018"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${DB_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
@@ -23,7 +23,7 @@ services:
       context: .
       dockerfile: ./Dockerfile
     ports:
-      - "8001:8000"
+      - "8001:8001"
     networks:
       - mynetwork
     depends_on:
@@ -34,7 +34,7 @@ services:
     container_name: redis-cache_order
     restart: on-failure
     ports:
-      - '6380:6379'
+      - '6380:6380'
     command: redis-server
     volumes:
       - cache:/data
