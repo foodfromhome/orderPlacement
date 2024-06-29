@@ -15,5 +15,8 @@ class GlobalConfig(BaseConfig):
     redis_host = os.getenv("REDIS_SERVER")
     redis_port = os.getenv("REDIS_PORT")
 
+    yookassa_api_key = os.getenv("YOOKASSA_API_KEY")
+    yookassa_account_id = os.getenv("YOOKASSA_ACCOUNT_ID")
+
 
 settings = GlobalConfig()

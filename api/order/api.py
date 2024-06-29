@@ -5,6 +5,7 @@ from starlette.responses import JSONResponse
 from api.order.models.orders import OrdersUser, Order
 from api.order.schemas import OrderSchema, StatusSchema
 from beanie import PydanticObjectId
+from api.yookassa_api.request import create_payment
 
 from typing import List
 
@@ -120,3 +121,28 @@ async def update_status_order_id(order_id: PydanticObjectId, request: StatusSche
 
     except HTTPException as e:
         return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content=str(e))
+
+
+@router.post("/orders/{order_id}/confirm", summary="Форирование ссылки на оплату",
+             status_code=status.HTTP_201_CREATED)
+async def confirm_order(order_id: PydanticObjectId):
+    try:
+
+        user_orders = await OrdersUser.find_one({"orders.id": order_id})
+
+        if user_orders is None:
+
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Order not found")
+
+        for order in user_orders.orders:
+
+            if order.id == order_id:
+
+                url_payment = await create_payment(order.total_price, f"{order.id}\n\n")
+
+                return JSONResponse(status_code=status.HTTP_200_OK,
+                                    content={"url": url_payment})
+
+    except HTTPException as e:
+        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content=str(e))
+
