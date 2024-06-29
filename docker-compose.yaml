@@ -1,0 +1,49 @@
+services:
+  mongo:
+    image: mongo:4.4.6
+    container_name: mongo_container
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - mynetwork
+    logging:
+      driver: "none"
+
+  fast_api:
+    container_name: cartService
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "8000:8000"
+    networks:
+      - mynetwork
+    depends_on:
+      - mongo
+
+  redis-cache:
+    image: redis:alpine
+    container_name: redis-cache
+    restart: on-failure
+    ports:
+      - '6379:6379'
+    command: redis-server
+    volumes:
+      - cache:/data
+    networks:
+      - mynetwork
+
+volumes:
+  mongo_data:
+  cache:
+
+networks:
+  mynetwork:
