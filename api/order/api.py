@@ -7,6 +7,7 @@ from api.order.models.payment_history import PaymentHistory
 from api.order.schemas.orders import OrderSchema, StatusSchema
 from beanie import PydanticObjectId
 from api.yookassa_api.request import create_payment, check_payment
+from api.order.models.repository.cart import cart_repository
 
 import requests
 
@@ -22,12 +23,19 @@ async def create_order(user_id: int, request: OrderSchema):
         if user_orders is None:
             user_orders = OrdersUser(user_id=user_id, orders=[])
 
+        carts = await cart_repository.get_cart(user_id)
+
+        if carts is None:
+
+            return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Cart not found")
+
+        total_price = sum(item['price'] * item['quantity'] for item in carts)
 
         order = Order(
             address=request.address,
             city=request.city,
-            items=request.carts,
-            total_price=sum(item.price * item.quantity for item in request.carts)
+            items=carts,
+            total_price=total_price
         )
 
         user_orders.orders.append(order)
@@ -175,12 +183,14 @@ async def handle_payment_result(order_id: PydanticObjectId):
 
                 if yookassa_response == "succeeded":
                     order.status = OrderStatus.NEW
+                    order.payment_history.payment_status = 'Оплачено'
                     await user_orders.save()
                     return JSONResponse(content={"message": "Payment successful, order updated"},
                                         status_code=status.HTTP_200_OK)
 
                 elif yookassa_response == "canceled":
                     order.status = OrderStatus.CANCELLED
+                    order.payment_history.payment_status = 'Заказ отменен'
                     await user_orders.save()
                     return JSONResponse(content={"message": "Payment failed, order updated"},
                                         status_code=status.HTTP_200_OK)

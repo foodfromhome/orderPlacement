@@ -7,7 +7,7 @@ class OrderSchema(BaseModel):
     address: str
     city: str
     comment: str
-    carts: Optional[List[Items]] = []
+
 
 
 class StatusSchema(BaseModel):
