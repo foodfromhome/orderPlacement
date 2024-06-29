@@ -1,7 +1,7 @@
 services:
   mongo:
     image: mongo:4.4.6
-    container_name: mongo_container
+    container_name: mongo_container_order
     restart: always
     env_file:
       - .env
@@ -18,7 +18,7 @@ services:
       driver: "none"
 
   fast_api:
-    container_name: cartService
+    container_name: orderPlacement
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -31,7 +31,7 @@ services:
 
   redis-cache:
     image: redis:alpine
-    container_name: redis-cache
+    container_name: redis-cache_order
     restart: on-failure
     ports:
       - '6380:6379'
